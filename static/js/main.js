@@ -27,6 +27,7 @@ const timelineKpiPerda = document.getElementById('timeline-kpi-perda');
 
 // Referências - Insights e Tabs
 const timelineInsight = document.getElementById('timeline-insight');
+const mcInsight = document.getElementById('mc-insight');
 const tabRetention = document.getElementById('tab-retention');
 const tabAliquot = document.getElementById('tab-aliquot');
 
@@ -781,6 +782,30 @@ function updateMonteCarlo(data) {
             }
         }
     });
+
+    // Atualizar Explicação/Interpretação do Monte Carlo
+    if (mcInsight) {
+        const mNameSimple = MUNICIPALITIES[currentMunicipalityKey].name.split(' - ')[0];
+        const meanM = mc.mean / 1000000.0;
+        const p5M = mc.p5 / 1000000.0;
+        const p95M = mc.p95 / 1000000.0;
+        
+        const p5Abs = Math.abs(p5M).toFixed(1).replace('.', ',');
+        const p95Abs = Math.abs(p95M).toFixed(1).replace('.', ',');
+        const p5Label = p5M < 0 ? `um superávit de <strong>R$ ${p5Abs}M</strong>` : `um déficit de <strong>R$ ${p5Abs}M</strong>`;
+        const p95Label = p95M < 0 ? `um superávit de <strong>R$ ${p95Abs}M</strong>` : `um déficit de <strong>R$ ${p95Abs}M</strong>`;
+        const meanWord = meanM >= 0 ? 'perda (déficit) média' : 'ganho (superávit) médio';
+        
+        let explanationText = `<strong>Interpretação da Simulação:</strong> O gráfico apresenta a distribuição de frequências da EPL (Estimativa de Perda Líquida) após 10.000 iterações de Monte Carlo. Cada barra vertical representa um possível cenário de resultado fiscal simulado para <strong>${mNameSimple}</strong>.`;
+        
+        explanationText += `<br><br>• <strong>Análise de Cores:</strong> As barras em <span style="color: #4ade80; font-weight: bold;">verde (EPL < 0)</span> representam cenários de <strong>superávit fiscal</strong> (ganho de receita pelo IBS Destino). As barras em <span style="color: #f87171; font-weight: bold;">vermelho (EPL &ge; 0)</span> representam cenários de <strong>déficit orçamentário</strong> (perda líquida de arrecadação após a transição).`;
+        
+        explanationText += `<br>• <strong>Risco de Déficit (${mc.prob_deficit.toFixed(1).replace('.', ',')}%):</strong> Indica que, em ${mc.prob_deficit.toFixed(1).replace('.', ',')}% das simulações estocásticas, a receita própria sob risco superou o ganho de consumo local gerado pelo IBS. O município possui uma probabilidade de <strong>${mc.prob_surplus.toFixed(1).replace('.', ',')}%</strong> de alcançar superávit fiscal ex-post.`;
+        
+        explanationText += `<br>• <strong>Valor Esperado e Dispersão:</strong> O resultado esperado (médio) aponta para um ${meanWord} de <strong>R$ ${Math.abs(meanM).toFixed(2).replace('.', ',')}M</strong>. Entretanto, devido à volatilidade das variáveis, a faixa provável de oscilação com 90% de confiança (do percentil 5% ao 95%) indica que a EPL municipal pode variar desde ${p5Label} (cenário otimista) até ${p95Label} (cenário pessimista).`;
+        
+        mcInsight.innerHTML = explanationText;
+    }
 }
 
 // Inicializar na carga da página
