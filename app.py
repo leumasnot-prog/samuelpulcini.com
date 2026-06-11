@@ -13,6 +13,10 @@ MASSA_SALARIAL_BASE = 513712915.20
 BENEFICIOS_BASE = 107536530.07
 
 @app.route('/')
+def estudo():
+    return render_template('estudo.html')
+
+@app.route('/simulador')
 def index():
     return render_template('index.html')
 
@@ -141,4 +145,5 @@ def simulate():
         }), 400
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    import os
+    app.run(debug=True, port=int(os.environ.get('PORT', 5001)))

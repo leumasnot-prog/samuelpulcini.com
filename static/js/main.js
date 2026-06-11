@@ -3,11 +3,13 @@ const sliderBaseRec = document.getElementById('slider-base-rec');
 const sliderTIbs = document.getElementById('slider-t-ibs');
 const sliderThetaRet = document.getElementById('slider-theta-ret');
 const sliderRenda = document.getElementById('slider-renda');
+const sliderEob = document.getElementById('slider-eob');
 
 const valBaseRec = document.getElementById('val-base-rec');
 const valTIbs = document.getElementById('val-t-ibs');
 const valThetaRet = document.getElementById('val-theta-ret');
 const valRenda = document.getElementById('val-renda');
+const valEob = document.getElementById('val-eob');
 
 // Referências - KPIs Originais (Estáticos)
 const kpiK = document.getElementById('kpi-k');
@@ -92,20 +94,39 @@ function formatCurrencyM(value) {
     return `R$ ${valInM.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`;
 }
 
+// Slider fill: set CSS variable --fill-pct based on current value
+function updateSliderFill(slider) {
+    if (!slider) return;
+    const min = parseFloat(slider.min);
+    const max = parseFloat(slider.max);
+    const val = parseFloat(slider.value);
+    const pct = ((val - min) / (max - min)) * 100;
+    slider.style.setProperty('--fill-pct', pct.toFixed(2) + '%');
+}
+
+// Flash animation for KPI value elements when they update
+function flashValue(element) {
+    if (!element) return;
+    element.classList.remove('value-flash');
+    void element.offsetWidth; // force reflow to restart animation
+    element.classList.add('value-flash');
+    element.addEventListener('animationend', () => element.classList.remove('value-flash'), { once: true });
+}
+
 // Helper de Cores de Tema
 function getThemeColors() {
     const isLight = document.body.classList.contains('light-theme');
     return {
-        gridColor: isLight ? 'rgba(15, 23, 42, 0.06)' : 'rgba(255, 255, 255, 0.04)',
+        gridColor: isLight ? 'rgba(0, 31, 63, 0.06)' : 'rgba(255, 255, 255, 0.04)',
         textColor: isLight ? '#475569' : '#94a3b8',
-        tooltipBg: isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(11, 13, 21, 0.98)',
+        tooltipBg: isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(2, 16, 31, 0.98)',
         tooltipBorder: isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.12)',
-        tooltipText: isLight ? '#0f172a' : '#f8fafc',
-        tooltipTitle: isLight ? '#4f46e5' : '#a5b4fc',
-        mcBarSurplus: isLight ? 'rgba(5, 150, 105, 0.5)' : 'rgba(34, 197, 94, 0.5)',
-        mcBarDeficit: isLight ? 'rgba(220, 38, 38, 0.5)' : 'rgba(239, 68, 68, 0.5)',
-        mcBorderSurplus: isLight ? '#059669' : '#22c55e',
-        mcBorderDeficit: isLight ? '#dc2626' : '#ef4444'
+        tooltipText: isLight ? '#0f172a' : '#F6F7ED',
+        tooltipTitle: isLight ? '#00804C' : '#DBE64C',
+        mcBarSurplus: isLight ? 'rgba(0, 128, 76, 0.5)' : 'rgba(116, 195, 101, 0.5)',
+        mcBarDeficit: isLight ? 'rgba(216, 69, 58, 0.5)' : 'rgba(255, 110, 97, 0.5)',
+        mcBorderSurplus: isLight ? '#00804C' : '#74C365',
+        mcBorderDeficit: isLight ? '#d8453a' : '#FF6E61'
     };
 }
 
@@ -113,20 +134,24 @@ function getThemeColors() {
 function applyPreset(presetName) {
     const config = presets[presetName];
     if (!config) return;
-    
+
     sliderThetaRet.value = config.theta_ret;
     sliderTIbs.value = config.t_ibs;
     sliderRenda.value = config.renda;
     sliderBaseRec.value = config.base;
-    
+
+    // Update fills for all sliders
+    [sliderBaseRec, sliderTIbs, sliderThetaRet, sliderRenda, sliderEob].forEach(updateSliderFill);
+
     document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`preset-${presetName}`).classList.add('active');
-    
+
     fetchSimulation();
 }
 
 // Handler de eventos de sliders
-function onSliderInput() {
+function onSliderInput(e) {
+    if (e && e.target) updateSliderFill(e.target);
     document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
     fetchSimulation();
 }
@@ -135,6 +160,11 @@ function onSliderInput() {
 [sliderBaseRec, sliderTIbs, sliderThetaRet, sliderRenda].forEach(slider => {
     slider.addEventListener('input', onSliderInput);
 });
+
+// EOB slider listener
+if (sliderEob) {
+    sliderEob.addEventListener('input', onSliderInput);
+}
 
 // Ações dos Presets
 btnPresetAtual.addEventListener('click', () => applyPreset('atual'));
@@ -163,28 +193,37 @@ async function fetchSimulation() {
     valTIbs.textContent = `${parseFloat(sliderTIbs.value).toFixed(1)}%`;
     valThetaRet.textContent = `${sliderThetaRet.value}%`;
     valRenda.textContent = `R$ ${sliderRenda.value}M`;
-    
+
+    const eobPct = sliderEob ? parseFloat(sliderEob.value) : 0;
+    if (valEob) valEob.textContent = `+${eobPct}%`;
+
+    // Update all slider fills
+    [sliderBaseRec, sliderTIbs, sliderThetaRet, sliderRenda, sliderEob].forEach(updateSliderFill);
+
     const baseRecVal = parseFloat(sliderBaseRec.value) * 1000000.0;
     const tIbsVal = parseFloat(sliderTIbs.value);
     const thetaRetVal = parseFloat(sliderThetaRet.value);
     const rendaVal = parseFloat(sliderRenda.value) * 1000000.0;
-    
+
+    // Apply EOB expansion to income base
+    const rendaWithEob = rendaVal * (1 + eobPct / 100.0);
+
     const mData = MUNICIPALITIES[currentMunicipalityKey];
-    
+
     // Escalonar proporcionalmente massa salarial e benefícios baseado na rendaVal
     const totalBaseRenda = mData.massa_salarial + mData.beneficios;
     const ratio = totalBaseRenda > 0 ? (rendaVal / totalBaseRenda) : 1;
-    
+
     // Payload para o cálculo dinâmico no backend
     const payload = {
         t_ibs: tIbsVal,
-        c: 65.0, 
+        c: 65.0,
         theta_ret: thetaRetVal,
         r_risco: mData.r_risco,
         r_atual: mData.r_atual,
         massa_salarial: mData.massa_salarial * ratio,
         beneficios: mData.beneficios * ratio,
-        renda_disponivel: rendaVal
+        renda_disponivel: rendaWithEob
     };
     
     try {
@@ -223,20 +262,21 @@ function updateStaticDOM(data) {
     if (valTimelineIvtSubtext) {
         if (data.ivt >= 50) {
             valTimelineIvtSubtext.textContent = "Polo produtor — alto risco";
-            valTimelineIvtSubtext.style.color = "#f87171"; // Vermelho
+            valTimelineIvtSubtext.style.color = "#FF8A7A"; // Vermelho
         } else if (data.ivt >= 30) {
             valTimelineIvtSubtext.textContent = "Diversificado — médio risco";
-            valTimelineIvtSubtext.style.color = "#fbbf24"; // Amarelo
+            valTimelineIvtSubtext.style.color = "#DBE64C"; // Amarelo
         } else {
             valTimelineIvtSubtext.textContent = "Polo consumidor — baixo risco";
-            valTimelineIvtSubtext.style.color = "#4ade80"; // Verde
+            valTimelineIvtSubtext.style.color = "#74C365"; // Verde
         }
     }
     
     if (kpiEpl) {
         const prefix = data.epl >= 0 ? '+' : '';
         kpiEpl.textContent = `${prefix}${formatCurrencyM(data.epl)}`;
-        kpiEpl.style.color = data.epl >= 0 ? '#f87171' : '#4ade80';
+        kpiEpl.style.color = data.epl >= 0 ? '#FF8A7A' : '#74C365';
+        flashValue(kpiEpl);
     }
     
     if (eplCard) {
@@ -288,7 +328,39 @@ function updateStaticChart(data) {
     if (staticChartInstance) {
         staticChartInstance.destroy();
     }
-    
+
+    // Find break-even index: where ΔC_local >= r_risco
+    let breakEvenLabel = null;
+    for (let i = 0; i < deltaCData.length; i++) {
+        if (deltaCData[i] >= rRiscoData[i]) {
+            breakEvenLabel = labels[i];
+            break;
+        }
+    }
+
+    const sensitivityAnnotations = {};
+    if (breakEvenLabel) {
+        sensitivityAnnotations.breakEvenLine = {
+            type: 'line',
+            xMin: breakEvenLabel,
+            xMax: breakEvenLabel,
+            borderColor: 'rgba(116, 195, 101, 0.6)',
+            borderWidth: 1.5,
+            borderDash: [5, 3],
+            label: {
+                content: '✓ Break-even',
+                display: true,
+                position: 'start',
+                yAdjust: -10,
+                color: '#74C365',
+                backgroundColor: 'rgba(3, 24, 46, 0.9)',
+                font: { size: 9, weight: 'bold', family: 'Plus Jakarta Sans' },
+                padding: { x: 5, y: 3 },
+                borderRadius: 4
+            }
+        };
+    }
+
     staticChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
@@ -297,20 +369,20 @@ function updateStaticChart(data) {
                 {
                     label: 'Consumo Local Estimado (ΔC_local em Milhões R$)',
                     data: deltaCData,
-                    borderColor: '#6366f1',
+                    borderColor: '#DBE64C',
                     borderWidth: 3,
-                    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                    backgroundColor: 'rgba(219, 230, 76, 0.12)',
                     fill: true,
                     tension: 0.3,
-                    pointBackgroundColor: labels.map((_, idx) => idx === activeIndex ? '#f8fafc' : '#6366f1'),
-                    pointBorderColor: '#6366f1',
+                    pointBackgroundColor: labels.map((_, idx) => idx === activeIndex ? '#F6F7ED' : '#DBE64C'),
+                    pointBorderColor: '#DBE64C',
                     pointRadius: labels.map((_, idx) => idx === activeIndex ? 6 : 3),
                     pointHoverRadius: 7
                 },
                 {
                     label: 'Receita sob Risco (R_risco em Milhões R$)',
                     data: rRiscoData,
-                    borderColor: '#f87171',
+                    borderColor: '#FF8A7A',
                     borderWidth: 2,
                     borderDash: [6, 6],
                     backgroundColor: 'transparent',
@@ -323,16 +395,17 @@ function updateStaticChart(data) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false } // Usando legenda padrão desabilitada
+                legend: { display: false },
+                annotation: { annotations: sensitivityAnnotations }
             },
             scales: {
                 x: {
-                    title: { display: true, text: xAxisLabel, color: getThemeColors().textColor, font: { family: 'Outfit' } },
+                    title: { display: true, text: xAxisLabel, color: getThemeColors().textColor, font: { family: 'Plus Jakarta Sans' } },
                     grid: { color: getThemeColors().gridColor },
                     ticks: { color: getThemeColors().textColor }
                 },
                 y: {
-                    title: { display: true, text: 'Valores (Milhões R$)', color: getThemeColors().textColor, font: { family: 'Outfit' } },
+                    title: { display: true, text: 'Valores (Milhões R$)', color: getThemeColors().textColor, font: { family: 'Plus Jakarta Sans' } },
                     grid: { color: getThemeColors().gridColor },
                     ticks: { color: getThemeColors().textColor }
                 }
@@ -404,14 +477,14 @@ function calculateAndRenderTimeline(baseRec, tIbs, thetaRet, renda, rRisco) {
     
     // Atualizar KPIs da Linha do Tempo
     valTimelineEq.textContent = eqYear ? eqYear.toString() : 'Não atingido';
-    valTimelineEq.style.color = eqYear ? '#d97706' : '#ef4444';
+    valTimelineEq.style.color = eqYear ? '#DBE64C' : '#FF6E61';
     if (timelineKpiEq) {
         timelineKpiEq.className = eqYear ? 'kpi-card glass-card equilibrium' : 'kpi-card glass-card deficit';
         timelineKpiEq.style.borderColor = '';
     }
     
     valTimelinePerda.textContent = formatCurrencyM(perdaAcumulada);
-    valTimelinePerda.style.color = '#ef4444';
+    valTimelinePerda.style.color = '#FF6E61';
     if (timelineKpiPerda) {
         timelineKpiPerda.className = 'kpi-card glass-card deficit';
         timelineKpiPerda.style.borderColor = '';
@@ -439,13 +512,13 @@ function calculateAndRenderTimeline(baseRec, tIbs, thetaRet, renda, rRisco) {
     }
     
     if (ibs2078 >= baseRec) {
-        valTimelineReceita.style.color = '#16a34a';
+        valTimelineReceita.style.color = '#74C365';
         if (timelineKpiReceita) {
             timelineKpiReceita.className = 'kpi-card glass-card surplus';
             timelineKpiReceita.style.borderColor = '';
         }
     } else {
-        valTimelineReceita.style.color = '#ef4444';
+        valTimelineReceita.style.color = '#FF6E61';
         if (timelineKpiReceita) {
             timelineKpiReceita.className = 'kpi-card glass-card deficit';
             timelineKpiReceita.style.borderColor = '';
@@ -472,6 +545,52 @@ function calculateAndRenderTimeline(baseRec, tIbs, thetaRet, renda, rRisco) {
         timelineChartInstance.destroy();
     }
     
+    // Build chart annotations
+    const timelineAnnotations = {};
+
+    // Horizontal reference line at base revenue level
+    timelineAnnotations.baseRevLine = {
+        type: 'line',
+        yMin: baseRec / 1000000,
+        yMax: baseRec / 1000000,
+        borderColor: 'rgba(169, 186, 203, 0.18)',
+        borderWidth: 1,
+        borderDash: [4, 4],
+        label: {
+            content: 'Base: ' + (baseRec / 1000000).toFixed(0) + 'M',
+            display: true,
+            position: 'end',
+            xAdjust: -4,
+            color: 'rgba(169, 186, 203, 0.55)',
+            backgroundColor: 'transparent',
+            font: { size: 9, family: 'Plus Jakarta Sans' },
+            padding: 0
+        }
+    };
+
+    // Vertical line at equilibrium year (if reached)
+    if (eqYear) {
+        timelineAnnotations.eqYearLine = {
+            type: 'line',
+            xMin: eqYear.toString(),
+            xMax: eqYear.toString(),
+            borderColor: 'rgba(219, 230, 76, 0.65)',
+            borderWidth: 1.5,
+            borderDash: [6, 3],
+            label: {
+                content: '⚖ ' + eqYear,
+                display: true,
+                position: 'start',
+                yAdjust: -12,
+                color: '#DBE64C',
+                backgroundColor: 'rgba(3, 24, 46, 0.9)',
+                font: { size: 10, weight: 'bold', family: 'Plus Jakarta Sans' },
+                padding: { x: 6, y: 3 },
+                borderRadius: 4
+            }
+        };
+    }
+
     timelineChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
@@ -480,9 +599,9 @@ function calculateAndRenderTimeline(baseRec, tIbs, thetaRet, renda, rRisco) {
                 {
                     label: 'Seguro-Receita',
                     data: seguroData.map(val => val / 1000000.0),
-                    borderColor: '#185FA5',
+                    borderColor: '#1E488F',
                     borderWidth: 3,
-                    backgroundColor: 'rgba(24, 95, 165, 0.1)',
+                    backgroundColor: 'rgba(30, 72, 143, 0.18)',
                     fill: true,
                     tension: 0.1,
                     pointRadius: 0,
@@ -491,10 +610,10 @@ function calculateAndRenderTimeline(baseRec, tIbs, thetaRet, renda, rRisco) {
                 {
                     label: 'IBS Destino',
                     data: ibsData.map(val => val / 1000000.0),
-                    borderColor: '#16a34a',
+                    borderColor: '#74C365',
                     borderWidth: 2,
                     borderDash: [5, 3],
-                    backgroundColor: 'rgba(22, 163, 74, 0.05)',
+                    backgroundColor: 'rgba(116, 195, 101, 0.07)',
                     fill: true,
                     tension: 0.1,
                     pointRadius: 0,
@@ -503,7 +622,7 @@ function calculateAndRenderTimeline(baseRec, tIbs, thetaRet, renda, rRisco) {
                 {
                     label: 'Receita Total',
                     data: totalData.map(val => val / 1000000.0),
-                    borderColor: '#d97706',
+                    borderColor: '#DBE64C',
                     borderWidth: 2.5,
                     borderDash: [2, 2],
                     backgroundColor: 'transparent',
@@ -522,12 +641,15 @@ function calculateAndRenderTimeline(baseRec, tIbs, thetaRet, renda, rRisco) {
                 intersect: false
             },
             plugins: {
-                legend: { display: false }, // Legenda desabilitada para usar a legenda HTML
+                legend: { display: false },
                 tooltip: {
-                    enabled: false, // Desabilitar Tooltip nativo
+                    enabled: false,
                     external: function(context) {
                         updateCustomTooltip(context);
                     }
+                },
+                annotation: {
+                    annotations: timelineAnnotations
                 }
             },
             scales: {
@@ -535,7 +657,7 @@ function calculateAndRenderTimeline(baseRec, tIbs, thetaRet, renda, rRisco) {
                     grid: { color: getThemeColors().gridColor },
                     ticks: {
                         color: getThemeColors().textColor,
-                        font: { family: 'Outfit', size: 11 },
+                        font: { family: 'Plus Jakarta Sans', size: 11 },
                         autoSkip: false,
                         callback: function(val, index) {
                             const year = this.getLabelForValue(val);
@@ -548,7 +670,7 @@ function calculateAndRenderTimeline(baseRec, tIbs, thetaRet, renda, rRisco) {
                     grid: { color: getThemeColors().gridColor },
                     ticks: {
                         color: getThemeColors().textColor,
-                        font: { family: 'Outfit', size: 11 },
+                        font: { family: 'Plus Jakarta Sans', size: 11 },
                         callback: function(value) {
                             return 'R$' + value.toFixed(0) + 'M';
                         }
@@ -574,7 +696,7 @@ function updateCustomTooltip(context) {
         tooltipEl.style.pointerEvents = 'none';
         tooltipEl.style.transition = 'all 0.1s ease';
         tooltipEl.style.fontSize = '0.8rem';
-        tooltipEl.style.fontFamily = 'Outfit, sans-serif';
+        tooltipEl.style.fontFamily = '"Plus Jakarta Sans", sans-serif';
         tooltipEl.style.boxShadow = '0 10px 30px rgba(0,0,0,0.6)';
         tooltipEl.style.zIndex = '9999';
         document.body.appendChild(tooltipEl);
@@ -653,7 +775,7 @@ function showKpiTooltip(e, text) {
         kpiTooltipEl.style.pointerEvents = 'none';
         kpiTooltipEl.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
         kpiTooltipEl.style.fontSize = '0.78rem';
-        kpiTooltipEl.style.fontFamily = 'Outfit, sans-serif';
+        kpiTooltipEl.style.fontFamily = '"Plus Jakarta Sans", sans-serif';
         kpiTooltipEl.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
         kpiTooltipEl.style.zIndex = '10000';
         kpiTooltipEl.style.width = '280px';
@@ -698,14 +820,17 @@ function updateMonteCarlo(data) {
     const valMcMedian = document.getElementById('val-mc-median');
     const valMcInterval = document.getElementById('val-mc-interval');
 
-    if (valMcProbDeficit) valMcProbDeficit.textContent = `${mc.prob_deficit.toFixed(1).replace('.', ',')}%`;
+    if (valMcProbDeficit) {
+        valMcProbDeficit.textContent = `${mc.prob_deficit.toFixed(1).replace('.', ',')}%`;
+        flashValue(valMcProbDeficit);
+    }
     if (valMcProbSurplus) valMcProbSurplus.textContent = `Superávit: ${mc.prob_surplus.toFixed(1).replace('.', ',')}%`;
     
     if (valMcMean) {
         const valueM = mc.mean / 1000000.0;
         const prefix = valueM >= 0 ? '+' : '';
         valMcMean.textContent = `${prefix}R$ ${valueM.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`;
-        valMcMean.style.color = valueM >= 0 ? '#f87171' : '#4ade80';
+        valMcMean.style.color = valueM >= 0 ? '#FF8A7A' : '#74C365';
     }
 
     if (valMcMedian) {
@@ -770,12 +895,12 @@ function updateMonteCarlo(data) {
             },
             scales: {
                 x: {
-                    title: { display: true, text: 'Intervalo de EPL (Perda (+) / Ganho (-))', color: tColors.textColor, font: { family: 'Outfit', size: 10 } },
+                    title: { display: true, text: 'Intervalo de EPL (Perda (+) / Ganho (-))', color: tColors.textColor, font: { family: 'Plus Jakarta Sans', size: 10 } },
                     grid: { display: false },
                     ticks: { color: tColors.textColor, font: { size: 9 }, maxRotation: 45, minRotation: 0 }
                 },
                 y: {
-                    title: { display: true, text: 'Simulações', color: tColors.textColor, font: { family: 'Outfit', size: 10 } },
+                    title: { display: true, text: 'Simulações', color: tColors.textColor, font: { family: 'Plus Jakarta Sans', size: 10 } },
                     grid: { color: tColors.gridColor },
                     ticks: { color: tColors.textColor, font: { size: 9 } }
                 }
@@ -798,7 +923,7 @@ function updateMonteCarlo(data) {
         
         let explanationText = `<strong>Interpretação da Simulação:</strong> O gráfico apresenta a distribuição de frequências da EPL (Estimativa de Perda Líquida) após 10.000 iterações de Monte Carlo. Cada barra vertical representa um possível cenário de resultado fiscal simulado para <strong>${mNameSimple}</strong>.`;
         
-        explanationText += `<br><br>• <strong>Análise de Cores:</strong> As barras em <span style="color: #4ade80; font-weight: bold;">verde (EPL < 0)</span> representam cenários de <strong>superávit fiscal</strong> (ganho de receita pelo IBS Destino). As barras em <span style="color: #f87171; font-weight: bold;">vermelho (EPL &ge; 0)</span> representam cenários de <strong>déficit orçamentário</strong> (perda líquida de arrecadação após a transição).`;
+        explanationText += `<br><br>• <strong>Análise de Cores:</strong> As barras em <span style="color: #74C365; font-weight: bold;">verde (EPL < 0)</span> representam cenários de <strong>superávit fiscal</strong> (ganho de receita pelo IBS Destino). As barras em <span style="color: #FF8A7A; font-weight: bold;">vermelho (EPL &ge; 0)</span> representam cenários de <strong>déficit orçamentário</strong> (perda líquida de arrecadação após a transição).`;
         
         explanationText += `<br>• <strong>Risco de Déficit (${mc.prob_deficit.toFixed(1).replace('.', ',')}%):</strong> Indica que, em ${mc.prob_deficit.toFixed(1).replace('.', ',')}% das simulações estocásticas, a receita própria sob risco superou o ganho de consumo local gerado pelo IBS. O município possui uma probabilidade de <strong>${mc.prob_surplus.toFixed(1).replace('.', ',')}%</strong> de alcançar superávit fiscal ex-post.`;
         
@@ -949,18 +1074,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // Configurar os presets baseados na escala deste município
         presets.atual.renda = rendaValue;
         presets.atual.base = baseRecValue;
-        
+
         presets.fomento.renda = rendaValue;
         presets.fomento.base = baseRecValue;
-        
+
         presets.max.renda = rendaValue;
         presets.max.base = baseRecValue;
-        
+
+        // Re-initialize slider fills after municipality change
+        [sliderBaseRec, sliderTIbs, sliderThetaRet, sliderRenda, sliderEob].forEach(updateSliderFill);
+
         fetchSimulation();
     }
 
     // Inicializar o Caso Base (Pradópolis)
     onMunicipalityChange('pradopolis');
+
+    // Initialize slider fills on page load
+    [sliderBaseRec, sliderTIbs, sliderThetaRet, sliderRenda, sliderEob].forEach(updateSliderFill);
 
     // Configurar listeners de tooltip para os cartões de KPI
     document.querySelectorAll('.kpi-card[data-tooltip]').forEach(card => {
@@ -979,7 +1110,9 @@ document.addEventListener('DOMContentLoaded', () => {
         themeToggleBtn.addEventListener('click', () => {
             document.body.classList.toggle('light-theme');
             const isLight = document.body.classList.contains('light-theme');
-            themeToggleBtn.textContent = isLight ? '🌙' : '☀️';
+            const sunIcon = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+            const moonIcon = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+            themeToggleBtn.innerHTML = isLight ? moonIcon : sunIcon;
             fetchSimulation();
         });
     }

@@ -1,3 +1,6 @@
 .DS_Store
 __pycache__/
 *.pyc
+
+# Local Claude Code config (preview launcher, local settings)
+.claude/
