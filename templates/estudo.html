@@ -57,6 +57,19 @@
                 <strong>que consome</strong>. Este estudo mede, com matemática e 10.000 simulações,
                 o que isso significa para um pequeno município industrial do interior paulista.
             </p>
+            <nav class="hero-toc reveal d5" aria-label="Sumário dos capítulos">
+                <span class="hero-toc-meta">8 capítulos &middot; ~12 min de leitura</span>
+                <div class="hero-toc-chips">
+                    <a href="#reforma"><b>01</b> A Reforma</a>
+                    <a href="#pradopolis"><b>02</b> Pradópolis</a>
+                    <a href="#concentracao"><b>03</b> A Concentração</a>
+                    <a href="#ivt"><b>04</b> O IVT</a>
+                    <a href="#huff"><b>05</b> A Gravidade</a>
+                    <a href="#epl"><b>06</b> A Conta</a>
+                    <a href="#montecarlo"><b>07</b> 10.000 Futuros</a>
+                    <a href="#virada"><b>08</b> A Virada</a>
+                </div>
+            </nav>
             <div class="hero-meta reveal d5">
                 <div><strong>Samuel Pulcini dos Santos</strong><span>Autor &middot; Contabilidade FEA-RP/USP</span></div>
                 <div class="divider"></div>
@@ -75,8 +88,8 @@
             <span class="chapter-number">Capítulo 01</span>
             <h2>A maior mudança tributária <em>em 60 anos</em></h2>
             <p class="chapter-lead">
-                A Emenda Constitucional nº 132/2023 extinguiu o <strong>ISS</strong> (municipal) e o
-                <strong>ICMS</strong> (estadual) e criou em seu lugar o <strong>IBS</strong> — Imposto
+                A Emenda Constitucional nº 132/2023 extinguiu o <strong class="gloss" tabindex="0" data-def="Imposto Sobre Serviços: municipal, hoje recolhido na cidade do prestador do serviço.">ISS</strong> (municipal) e o
+                <strong class="gloss" tabindex="0" data-def="Imposto sobre Circulação de Mercadorias e Serviços: estadual; 25% do total é repartido com os municípios — a chamada cota-parte.">ICMS</strong> (estadual) e criou em seu lugar o <strong class="gloss" tabindex="0" data-def="Imposto sobre Bens e Serviços: o substituto único, recolhido no destino — onde mora o consumidor final.">IBS</strong> — Imposto
                 sobre Bens e Serviços. Parece só uma troca de siglas. Não é. O que muda de verdade é
                 <em>o endereço</em> para onde o dinheiro vai.
             </p>
@@ -221,7 +234,7 @@
         </div>
 
         <div class="vaf-block reveal">
-            <h3>De onde vem o valor que gera o repasse de ICMS (VAF 2024)</h3>
+            <h3>De onde vem o valor que gera o repasse de ICMS (<span class="gloss" tabindex="0" data-def="Valor Adicionado Fiscal: indicador que mede a riqueza gerada em cada município e define sua fatia na cota-parte do ICMS.">VAF</span> 2024)</h3>
             <div class="vaf-bar" id="vaf-bar">
                 <div class="vaf-seg usina" data-width="69.67"><span>Usina sucroenergética <b>69,7%</b></span></div>
                 <div class="vaf-seg grupo" data-width="5.55"><span></span></div>
@@ -252,6 +265,10 @@
                     </svg>
                     <div class="ring-text"><b>79,5%</b><span>migra</span></div>
                 </div>
+                <div class="ring-legend">
+                    <span><i class="leg-migra"></i>migra para outras cidades</span>
+                    <span><i class="leg-fica"></i>fica em Pradópolis</span>
+                </div>
                 <p>Dos R$ 2,57 mi pagos pelos 20 maiores contribuintes de ISS, <strong>R$ 2,05 mi vêm de serviços
                 B2B para a usina</strong> (manutenção, caldeiraria, TI). Com o IBS, esse imposto viaja junto com o
                 açúcar e o etanol — e é recolhido na cidade do consumidor final.</p>
@@ -264,6 +281,10 @@
                         <circle class="ring-val" cx="60" cy="60" r="52"/>
                     </svg>
                     <div class="ring-text"><b>97,6%</b><span>migra</span></div>
+                </div>
+                <div class="ring-legend">
+                    <span><i class="leg-migra"></i>migra para outras cidades</span>
+                    <span><i class="leg-fica"></i>fica em Pradópolis</span>
                 </div>
                 <p>Na carteira dos 20 maiores geradores de VAF, <strong>R$ 22,6 mi de R$ 23,2 mi</strong> estão
                 ancorados em produção exportadora e logística. O consumo local (energia residencial, telefonia,
@@ -465,7 +486,7 @@
                 <span class="sc-name">Alíquota de referência do IBS</span>
                 <b class="sc-value">− R$ 3,21 mi</b>
                 <span class="sc-class">déficit anual</span>
-                <p>A estimativa central: a cidade não se sustenta sozinha e depende do Seguro-Receita.</p>
+                <p>A estimativa central: a cidade não se sustenta sozinha e depende do <span class="gloss" tabindex="0" data-def="Mecanismo de transição da reforma que garante parte da receita histórica dos municípios entre 2029 e 2078, derretendo gradualmente.">Seguro-Receita</span>.</p>
             </div>
             <div class="scenario-card surplus reveal">
                 <span class="sc-rate">26,5%</span>
@@ -643,6 +664,46 @@
                 </span>
                 <span>ajuste alíquotas, retenção e renda — e rode seu próprio Monte Carlo</span>
             </a>
+
+            <div class="sources reveal" id="fontes">
+                <span class="credits-kicker">Referências</span>
+                <div class="refs-carousel">
+                    <button type="button" class="refs-arrow refs-arrow-prev" id="refs-prev" aria-label="Referências anteriores"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+                    <ul class="sources-list refs-cards" id="refs-track" tabindex="0" aria-label="Lista de referências bibliográficas">
+                    <li><b><a href="https://doi.org/10.11606/rco.v10i26.111202" target="_blank" rel="noopener">Azevedo &amp; Aquino (2016)</a></b><span>Planejamento em municípios de pequeno porte em São Paulo &mdash; <em>Rev. de Contabilidade e Organizações</em></span></li>
+                    <li><b>Bird &amp; Gendron (2010)</b><span>Subnational Taxation in Developing Countries &mdash; World Bank</span></li>
+                    <li><b>EC n&ordm; 132/2023</b><span>Emenda Constitucional da Reforma Tributária &mdash; altera o Sistema Tributário Nacional</span></li>
+                    <li><b>LC n&ordm; 214/2025</b><span>Institui o IBS, a CBS e o Imposto Seletivo</span></li>
+                    <li><b>LC n&ordm; 227/2026</b><span>Regras de transição, fato gerador e distribuição de receitas</span></li>
+                    <li><b>Christaller (1933)</b><span><em>Die zentralen Orte in Süddeutschland</em> &mdash; teoria dos lugares centrais</span></li>
+                    <li><b>Converse (1949)</b><span>New Laws of Retail Gravitation &mdash; <em>Journal of Marketing</em></span></li>
+                    <li><b>Huff (1964)</b><span>Defining and Estimating a Trading Area &mdash; <em>Journal of Marketing</em></span></li>
+                    <li><b>Reilly (1929)</b><span>Methods for the Study of Retail Relationships &mdash; Univ. of Texas</span></li>
+                    <li><b>Lösch (1954)</b><span><em>The Economics of Location</em> &mdash; Yale University Press</span></li>
+                    <li><b>Richardson (1978)</b><span><em>Regional Economics</em> &mdash; Univ. of Illinois Press</span></li>
+                    <li><b><a href="https://www.ibge.gov.br" target="_blank" rel="noopener">REGIC &mdash; IBGE (2018)</a></b><span>Regiões de Influência das Cidades &mdash; hierarquia urbana</span></li>
+                    <li><b><a href="https://www.ibge.gov.br/cidades-e-estados/sp/pradopolis.html" target="_blank" rel="noopener">IBGE (2025)</a></b><span>Cidades e Estados: Pradópolis</span></li>
+                    <li><b>POF/IBGE (2017-2018)</b><span>Pesquisa de Orçamentos Familiares &mdash; perfil das despesas no Brasil</span></li>
+                    <li><b><a href="https://doi.org/10.11606/issn.1982-6486.rco.2020.163964" target="_blank" rel="noopener">Klein Junior (2020)</a></b><span>Gestão de riscos no setor público brasileiro &mdash; <em>RCO</em></span></li>
+                    <li><b><a href="https://doi.org/10.1590/S0104-530X2013005000014" target="_blank" rel="noopener">Lacerda et al. (2013)</a></b><span>Design Science Research &mdash; <em>Gestão &amp; Produção</em></span></li>
+                    <li><b><a href="https://www.orfonline.org" target="_blank" rel="noopener">Mankikar (2020)</a></b><span>Impacto do GST nas finanças municipais de Mumbai &mdash; ORF</span></li>
+                    <li><b><a href="https://doi.org/10.1590/1808-057x20259050" target="_blank" rel="noopener">Murcia (2025)</a></b><span>A reforma tributária e a pesquisa contábil-tributária &mdash; <em>Rev. Contabilidade &amp; Finanças</em></span></li>
+                    <li><b><a href="https://doi.org/10.1787/7594fbdd-en" target="_blank" rel="noopener">OECD (2025)</a></b><span>Revenue Statistics in Latin America and the Caribbean</span></li>
+                    <li><b><a href="https://doi.org/10.11606/issn.1982-6486.rco.2025.233211" target="_blank" rel="noopener">Soares et al. (2025)</a></b><span>Orçamento baseado em desempenho no setor público &mdash; <em>RCO</em></span></li>
+                </ul>
+                    <button type="button" class="refs-arrow refs-arrow-next" id="refs-next" aria-label="Próximas referências"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+                </div>
+
+                <span class="credits-kicker sources-kicker-2">Fontes de dados públicos</span>
+                <ul class="sources-list">
+                    <li><b>Prefeitura de Pradópolis</b><span>arrecadação municipal de ISS e ICMS &mdash; ano-base 2024</span></li>
+                    <li><b>SEFAZ-SP</b><span>Valor Adicionado Fiscal (VAF) e cota-parte do ICMS</span></li>
+                    <li><b>IBGE</b><span>população estimada e PIB dos Municípios (Pradópolis-SP)</span></li>
+                    <li><b>POF/IBGE</b><span>Pesquisa de Orçamentos Familiares &mdash; propensão ao consumo tributável (Sudeste)</span></li>
+                    <li><b>RAIS / MTE (2024)</b><span>vínculos formais de emprego e massa salarial</span></li>
+                    <li><b>INSS &middot; Bolsa Família</b><span>benefícios previdenciários e sociais transferidos ao município</span></li>
+                </ul>
+            </div>
 
             <div class="credits reveal" id="credits">
                 <span class="credits-kicker">Quem está por trás do estudo</span>

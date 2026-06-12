@@ -20,6 +20,7 @@
     var progressBar = document.getElementById('progress-bar');
     var header = document.getElementById('site-header');
     var navLinks = document.querySelectorAll('#chapter-nav a');
+    navLinks.forEach(function (a) { a.setAttribute('aria-label', a.dataset.label || 'Capítulo'); });
     var sections = Array.prototype.map.call(navLinks, function (a) {
         return document.querySelector(a.getAttribute('href'));
     });
@@ -137,7 +138,11 @@
         }
 
         var t = 0;
+        var heroRunning = true;
+        var heroVisible = true;
+
         function frame() {
+            if (!heroRunning) return;
             ctx.clearRect(0, 0, W, H);
             t++;
 
@@ -181,6 +186,21 @@
             }
             requestAnimationFrame(frame);
         }
+
+        function setRunning(on) {
+            if (on && !heroRunning) { heroRunning = true; requestAnimationFrame(frame); }
+            else if (!on) { heroRunning = false; }
+        }
+
+        // pausa quando o hero sai da tela ou a aba fica oculta (economia de bateria/CPU)
+        new IntersectionObserver(function (entries) {
+            heroVisible = entries[0].isIntersecting;
+            setRunning(heroVisible && !document.hidden);
+        }, { threshold: 0 }).observe(canvas);
+
+        document.addEventListener('visibilitychange', function () {
+            setRunning(heroVisible && !document.hidden);
+        });
 
         window.addEventListener('resize', init);
         init();
@@ -500,6 +520,13 @@
         var noteEl = document.getElementById('tipping-note');
         var MAX_ABS = 16e6; // escala da barra (R$ ±16 mi)
 
+        // convite ao toque: pulso no handle até a primeira interação
+        slider.classList.add('nudge');
+        slider.addEventListener('input', function removeNudge() {
+            slider.classList.remove('nudge');
+            slider.removeEventListener('input', removeNudge);
+        });
+
         function update() {
             var theta = parseFloat(slider.value) / 100;
             var k = C_PROP * theta;
@@ -587,6 +614,26 @@
             });
 
             map.touchZoomRotate.disableRotation();
+            map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+
+            // botão de recentralizar no território do estudo
+            var homeCtrl = {
+                onAdd: function () {
+                    var div = document.createElement('div');
+                    div.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+                    div.innerHTML = '<button type="button" class="map-home-btn" aria-label="Recentralizar mapa" title="Recentralizar">⌖</button>';
+                    div.querySelector('button').addEventListener('click', fitRegion);
+                    return div;
+                },
+                onRemove: function () {}
+            };
+            map.addControl(homeCtrl, 'top-right');
+
+            function fitRegion() {
+                var bounds = new maplibregl.LngLatBounds();
+                CITIES.forEach(function (c) { bounds.extend([c.lng, c.lat]); });
+                map.fitBounds(bounds, { padding: { top: 60, bottom: 70, left: 60, right: 60 }, duration: 1200 });
+            }
 
             CITIES.forEach(function (c) {
                 var el = document.createElement('div');
@@ -683,19 +730,19 @@
                 name: 'Samuel Pulcini dos Santos',
                 role: 'Autor · Servidor Público · Ciências Contábeis · FEA-RP/USP',
                 desc: 'Servidor público e estudante de Ciências Contábeis na USP de Ribeirão Preto, com experiência em Contabilidade Pública e nos ciclos de Planejamento e Orçamento. Aplica tecnologia e análise de dados com a missão de modernizar a gestão e transformar realidades na administração pública.',
-                img: '/static/samuel.jpg'
+                img: 'static/samuel.jpg'
             },
             {
                 name: 'Sílvio Hiroshi Nakao, Prof. Dr.',
                 role: 'Orientador · Professor Associado · Depto. de Contabilidade · FEA-RP/USP',
                 desc: 'Editor-Chefe da Revista de Contabilidade e Organizações (RCO) e colíder do Grupo de Pesquisas em Informações Contábeis. Responsável pela orientação científica e metodológica desta pesquisa.',
-                img: '/static/nakao.jpg'
+                img: 'static/nakao.jpg'
             },
             {
                 name: 'Programa PUB-USP',
                 role: 'Fomento · Universidade de São Paulo',
                 desc: 'Pesquisa desenvolvida no Programa Unificado de Bolsas de Estudo para Apoio e Formação de Estudantes de Graduação da USP.',
-                img: '/static/usp-logo.png',
+                img: 'static/usp-logo.png',
                 logo: true
             }
         ];
@@ -764,6 +811,39 @@
             card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
             card.style.setProperty('--my', (e.clientY - r.top) + 'px');
         }, { passive: true });
+    })();
+
+    /* =========================================================
+       15. Carrossel de referências
+       ========================================================= */
+    (function refsCarousel() {
+        var track = document.getElementById('refs-track');
+        var prev = document.getElementById('refs-prev');
+        var next = document.getElementById('refs-next');
+        if (!track || !prev || !next) return;
+
+        function update() {
+            var max = track.scrollWidth - track.clientWidth;
+            prev.disabled = track.scrollLeft <= 4;
+            next.disabled = track.scrollLeft >= max - 4;
+        }
+
+        function slide(dir) {
+            track.scrollBy({
+                left: dir * Math.max(track.clientWidth - 60, 260),
+                behavior: reducedMotion ? 'auto' : 'smooth'
+            });
+        }
+
+        prev.addEventListener('click', function () { slide(-1); });
+        next.addEventListener('click', function () { slide(1); });
+        track.addEventListener('scroll', update, { passive: true });
+        track.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowRight') { slide(1); e.preventDefault(); }
+            if (e.key === 'ArrowLeft') { slide(-1); e.preventDefault(); }
+        });
+        window.addEventListener('resize', update);
+        update();
     })();
 
 })();
