@@ -1134,3 +1134,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Spotlight: brilho radial que segue o cursor nos cards (somente desktop)
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.addEventListener('pointermove', (e) => {
+        const card = e.target.closest && e.target.closest('.glass-card');
+        if (!card) return;
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive: true });
+}

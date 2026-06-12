@@ -388,7 +388,8 @@ body.light-theme input[type=range]::-webkit-slider-runnable-track {
 
 .chart-tab.active {
     background: var(--color-primary);
-    color: var(--text-primary);
+    color: #001F3F;
+    font-weight: 700;
 }
 
 .chart-container {
@@ -968,3 +969,67 @@ body.light-theme .footer {
 
 
 
+
+/* ============================
+   SPOTLIGHT HOVER (desktop)
+   ============================ */
+@media (hover: hover) and (pointer: fine) {
+    .glass-card { position: relative; }
+
+    .glass-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.35s;
+        background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(219, 230, 76, 0.06), transparent 65%);
+    }
+
+    .glass-card:hover::after { opacity: 1; }
+}
+
+body.light-theme .glass-card::after {
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(0, 128, 76, 0.06), transparent 65%);
+}
+
+/* ============================
+   MOBILE (≤ 640px)
+   ============================ */
+@media (max-width: 640px) {
+    body { padding: 1.25rem 1rem; }
+
+    /* abre espaço para o toggle de tema e o link de voltar */
+    header { padding-top: 3rem; }
+    header h1 { font-size: 1.55rem; }
+    header p { font-size: 0.92rem; }
+
+    .sidebar { padding: 1.4rem; }
+    .chart-card { padding: 1.3rem; }
+
+    /* título dos gráficos com abas empilha em telas estreitas */
+    .chart-card h3 { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+    .chart-tabs { width: 100%; }
+    .chart-tab { flex: 1; text-align: center; }
+
+    /* alvo de toque maior nos sliders */
+    input[type=range]::-webkit-slider-thumb {
+        height: 26px;
+        width: 26px;
+        margin-top: -10px;
+    }
+    input[type=range]::-webkit-slider-runnable-track { height: 8px; }
+
+    /* formulário do modal de município em coluna única (vence o style inline) */
+    .modal-content form > div { grid-template-columns: 1fr !important; }
+    .modal-content { padding: 1.5rem 1.2rem !important; }
+
+    /* KPIs com respiro menor */
+    .kpi-card { min-height: 120px; padding: 1.2rem; }
+
+    .footer { flex-direction: column; align-items: flex-start; }
+}
+
+/* botões com resposta de toque imediata */
+button, .preset-btn, .chart-tab, .modal-submit-btn { touch-action: manipulation; }

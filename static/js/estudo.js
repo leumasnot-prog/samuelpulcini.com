@@ -543,4 +543,227 @@
         update();
     })();
 
+    /* =========================================================
+       11. Mapa real da região (MapLibre GL, lazy-loaded)
+       ========================================================= */
+    (function regionMap() {
+        var container = document.getElementById('region-map');
+        if (!container) return;
+
+        var CITIES = [
+            { name: 'Pradópolis', lng: -48.0655, lat: -21.3597, kind: 'foco',
+              info: '<b>O município do estudo.</b> 17.078 habitantes, PIB de R$ 1,1 bi e IVT de 61,6% — polo produtor de alta vulnerabilidade.' },
+            { name: 'Ribeirão Preto', lng: -47.8103, lat: -21.1775, kind: 'polo',
+              info: '<b>Capital Regional A</b> (REGIC/IBGE), a 40 km. Principal destino das compras que "vazam" de Pradópolis.' },
+            { name: 'Sertãozinho', lng: -47.9903, lat: -21.1389, kind: 'polo',
+              info: '<b>Polo industrial e comercial</b> a 30 km. Segundo destino do vazamento de consumo no Modelo de Huff.' },
+            { name: 'Barrinha', lng: -48.1639, lat: -21.1936, kind: 'viz',
+              info: 'Município vizinho de perfil industrial — candidato à replicação do modelo IVT/EPL.' },
+            { name: 'Dumont', lng: -47.9742, lat: -21.2325, kind: 'viz',
+              info: 'Município vizinho de perfil consumidor — tende a ganhar com o princípio do destino.' }
+        ];
+
+        function loadAsset(tag, attrs) {
+            return new Promise(function (resolve, reject) {
+                var el = document.createElement(tag);
+                for (var k in attrs) el[k] = attrs[k];
+                el.onload = resolve;
+                el.onerror = reject;
+                document.head.appendChild(el);
+            });
+        }
+
+        function initMap() {
+            var map = new maplibregl.Map({
+                container: container,
+                style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+                center: [-47.96, -21.25],
+                zoom: 9.6,
+                attributionControl: { compact: true },
+                cooperativeGestures: true,
+                dragRotate: false,
+                pitchWithRotate: false,
+                renderWorldCopies: false
+            });
+
+            map.touchZoomRotate.disableRotation();
+
+            CITIES.forEach(function (c) {
+                var el = document.createElement('div');
+                el.className = 'map-marker ' + c.kind;
+                el.innerHTML = '<div class="map-dot"></div><span class="map-label">' + c.name + '</span>';
+
+                var popup = new maplibregl.Popup({ offset: 18, closeButton: false, closeOnClick: true })
+                    .setHTML(c.info);
+
+                new maplibregl.Marker({ element: el }).setLngLat([c.lng, c.lat]).setPopup(popup).addTo(map);
+
+                el.addEventListener('mouseenter', function () { if (!popup.isOpen()) popup.setLngLat([c.lng, c.lat]).addTo(map); });
+                el.addEventListener('mouseleave', function () { popup.remove(); });
+            });
+
+            map.on('load', function () {
+                // linhas de vazamento: Pradópolis → polos concorrentes
+                map.addSource('leak', {
+                    type: 'geojson',
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            { type: 'Feature', geometry: { type: 'LineString', coordinates: [[-48.0655, -21.3597], [-47.8103, -21.1775]] } },
+                            { type: 'Feature', geometry: { type: 'LineString', coordinates: [[-48.0655, -21.3597], [-47.9903, -21.1389]] } }
+                        ]
+                    }
+                });
+                map.addLayer({
+                    id: 'leak-lines',
+                    type: 'line',
+                    source: 'leak',
+                    paint: {
+                        'line-color': '#FF8A7A',
+                        'line-width': 1.6,
+                        'line-opacity': 0.55,
+                        'line-dasharray': [2, 3]
+                    }
+                });
+
+                var bounds = new maplibregl.LngLatBounds();
+                CITIES.forEach(function (c) { bounds.extend([c.lng, c.lat]); });
+                map.fitBounds(bounds, { padding: { top: 60, bottom: 70, left: 60, right: 60 }, duration: 1200 });
+            });
+        }
+
+        onceVisible(container, function () {
+            Promise.all([
+                loadAsset('link', { rel: 'stylesheet', href: 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css' }),
+                loadAsset('script', { src: 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js' })
+            ]).then(initMap).catch(function () {
+                container.closest('.region-map-block').style.display = 'none';
+            });
+        }, 0.05);
+    })();
+
+    /* =========================================================
+       12. Botão magnético (CTA do simulador)
+       ========================================================= */
+    (function magnetize() {
+        var btn = document.getElementById('btn-magnetize');
+        if (!btn) return;
+
+        var COUNT = 16;
+        for (var i = 0; i < COUNT; i++) {
+            var p = document.createElement('span');
+            p.className = 'm-particle';
+            var ang = (i / COUNT) * Math.PI * 2 + Math.random() * 0.5;
+            var dist = 80 + Math.random() * 100;
+            p.style.setProperty('--px', Math.round(Math.cos(ang) * dist * 1.6) + 'px');
+            p.style.setProperty('--py', Math.round(Math.sin(ang) * dist * 0.6) + 'px');
+            p.style.setProperty('--pd', (Math.random() * 1.3).toFixed(2) + 's');
+            btn.appendChild(p);
+        }
+
+        function attract() { btn.classList.add('attracting'); }
+        function release() { btn.classList.remove('attracting'); }
+
+        btn.addEventListener('mouseenter', attract);
+        btn.addEventListener('mouseleave', release);
+        btn.addEventListener('touchstart', attract, { passive: true });
+        btn.addEventListener('touchend', release, { passive: true });
+        btn.addEventListener('touchcancel', release, { passive: true });
+    })();
+
+    /* =========================================================
+       13. Carrossel de créditos
+       ========================================================= */
+    (function credits() {
+        var root = document.getElementById('credits');
+        if (!root) return;
+
+        var ITEMS = [
+            {
+                name: 'Samuel Pulcini dos Santos',
+                role: 'Autor · Servidor Público · Ciências Contábeis · FEA-RP/USP',
+                desc: 'Servidor público e estudante de Ciências Contábeis na USP de Ribeirão Preto, com experiência em Contabilidade Pública e nos ciclos de Planejamento e Orçamento. Aplica tecnologia e análise de dados com a missão de modernizar a gestão e transformar realidades na administração pública.',
+                img: '/static/samuel.jpg'
+            },
+            {
+                name: 'Sílvio Hiroshi Nakao, Prof. Dr.',
+                role: 'Orientador · Professor Associado · Depto. de Contabilidade · FEA-RP/USP',
+                desc: 'Editor-Chefe da Revista de Contabilidade e Organizações (RCO) e colíder do Grupo de Pesquisas em Informações Contábeis. Responsável pela orientação científica e metodológica desta pesquisa.',
+                img: '/static/nakao.jpg'
+            },
+            {
+                name: 'Programa PUB-USP',
+                role: 'Fomento · Universidade de São Paulo',
+                desc: 'Pesquisa desenvolvida no Programa Unificado de Bolsas de Estudo para Apoio e Formação de Estudantes de Graduação da USP.',
+                img: '/static/usp-logo.png',
+                logo: true
+            }
+        ];
+
+        var avatarEl = document.getElementById('credits-avatar');
+        var nameEl = document.getElementById('credits-name');
+        var roleEl = document.getElementById('credits-role');
+        var descEl = document.getElementById('credits-desc');
+        var dotsEl = document.getElementById('credits-dots');
+        var idx = 0;
+        var timer = null;
+
+        ITEMS.forEach(function (_, i) {
+            var d = document.createElement('i');
+            d.addEventListener('click', function () { show(i); restart(); });
+            dotsEl.appendChild(d);
+        });
+
+        function show(i) {
+            idx = (i + ITEMS.length) % ITEMS.length;
+            var item = ITEMS[idx];
+
+            avatarEl.innerHTML = item.img
+                ? '<img' + (item.logo ? ' class="logo"' : '') + ' src="' + item.img + '" alt="' + item.name + '">'
+                : item.initials;
+
+            nameEl.textContent = item.name;
+            roleEl.textContent = item.role;
+
+            // blur-in palavra por palavra
+            descEl.innerHTML = item.desc.split(' ').map(function (w, wi) {
+                return '<span class="w" style="--wd:' + (wi * 28) + 'ms">' + w + '</span>';
+            }).join(' ');
+
+            Array.prototype.forEach.call(dotsEl.children, function (d, di) {
+                d.classList.toggle('on', di === idx);
+            });
+        }
+
+        function restart() {
+            clearInterval(timer);
+            if (!reducedMotion) timer = setInterval(function () { show(idx + 1); }, 6500);
+        }
+
+        document.getElementById('credits-prev').addEventListener('click', function () { show(idx - 1); restart(); });
+        document.getElementById('credits-next').addEventListener('click', function () { show(idx + 1); restart(); });
+
+        show(0);
+        onceVisible(root, restart, 0.3);
+    })();
+
+    /* =========================================================
+       14. Spotlight hover nos cards (desktop)
+       ========================================================= */
+    (function spotlight() {
+        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+        document.querySelectorAll(
+            '.stat-card, .scenario-card, .policy-card, .risk-card, .flow-card, .k-step, .mc-kpi, .artifact, .credits-card'
+        ).forEach(function (el) { el.classList.add('spot'); });
+
+        document.addEventListener('pointermove', function (e) {
+            var card = e.target.closest && e.target.closest('.spot');
+            if (!card) return;
+            var r = card.getBoundingClientRect();
+            card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+            card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        }, { passive: true });
+    })();
+
 })();

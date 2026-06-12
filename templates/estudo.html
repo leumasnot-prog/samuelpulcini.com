@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#02101f">
+    <meta name="color-scheme" content="dark">
     <title>Para onde vai o imposto? — Impactos da Reforma Tributária em Pradópolis-SP</title>
     <meta name="description" content="Um estudo interativo sobre o impacto da Reforma Tributária (EC 132/2023) na arrecadação de municípios produtores. TCC de Samuel Pulcini — FEA-RP/USP.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -175,6 +177,15 @@
                 <span class="stat-label">dos empregos formais na indústria-âncora</span>
                 <span class="stat-note">5.408 de 9.227 vínculos (RAIS/2024)</span>
             </div>
+        </div>
+
+        <div class="region-map-block reveal">
+            <div class="region-map-head">
+                <h3>O território do estudo</h3>
+                <p>Explore o mapa real da região: Pradópolis e os polos que atraem o consumo dos seus moradores.
+                <span class="map-hint">Para navegar, use dois dedos no celular ou Ctrl + scroll no computador.</span></p>
+            </div>
+            <div id="region-map" aria-label="Mapa interativo da região de Pradópolis"></div>
         </div>
 
         <div class="duality reveal">
@@ -625,19 +636,37 @@
                 <div class="artifact"><b>EPL</b><span>a régua do impacto em reais</span></div>
                 <div class="artifact"><b>Protocolo</b><span>5 etapas para replicar em qualquer cidade</span></div>
             </div>
-            <a href="{{ url_for('index') }}" class="btn-finale">
-                Experimente o simulador interativo
+            <a href="{{ url_for('index') }}" class="btn-finale" id="btn-magnetize">
+                <span class="btn-finale-label">
+                    <svg class="icon magnet-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15-4-4 6.75-6.77a7.79 7.79 0 0 1 11 11L13 22l-4-4 6.39-6.36a2.14 2.14 0 0 0-3-3L6 15"/><path d="m5 8 4 4"/><path d="m12 15 4 4"/></svg>
+                    Experimente o simulador interativo
+                </span>
                 <span>ajuste alíquotas, retenção e renda — e rode seu próprio Monte Carlo</span>
             </a>
+
+            <div class="credits reveal" id="credits">
+                <span class="credits-kicker">Quem está por trás do estudo</span>
+                <div class="credits-card">
+                    <div class="credits-avatar" id="credits-avatar"></div>
+                    <div class="credits-body">
+                        <b class="credits-name" id="credits-name"></b>
+                        <span class="credits-role" id="credits-role"></span>
+                        <p class="credits-desc" id="credits-desc"></p>
+                        <div class="credits-nav">
+                            <button id="credits-prev" aria-label="Anterior"><svg class="icon" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+                            <div class="credits-dots" id="credits-dots"></div>
+                            <button id="credits-next" aria-label="Próximo"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <footer class="study-footer">
             <div class="footer-author">
-                <img src="{{ url_for('static', filename='perfilfoto.png') }}" alt="Samuel Pulcini">
                 <div>
-                    <b>Samuel Pulcini dos Santos</b>
-                    <span>Pesquisa e desenvolvimento &middot; FEA-RP/USP (nº 13634144)</span>
-                    <span>Orientador: Prof. Dr. Sílvio Hiroshi Nakao &middot; Programa PUB-USP</span>
+                    <b>Impactos da Reforma Tributária sobre a Arrecadação Municipal</b>
+                    <span>Samuel Pulcini dos Santos &middot; FEA-RP/USP &middot; nº 13634144</span>
                 </div>
             </div>
             <div class="footer-links">
