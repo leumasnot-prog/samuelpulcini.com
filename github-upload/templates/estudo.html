@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#02101f">
+    <meta name="color-scheme" content="dark">
+    <title>Para onde vai o imposto? — Impactos da Reforma Tributária em Pradópolis-SP</title>
+    <meta name="description" content="Um estudo interativo sobre o impacto da Reforma Tributária (EC 132/2023) na arrecadação de municípios produtores. TCC de Samuel Pulcini — FEA-RP/USP.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estudo.css') }}">
+</head>
+<body>
+
+    <!-- Barra de progresso de leitura -->
+    <div class="progress-bar" id="progress-bar"></div>
+
+    <!-- Navegação lateral por capítulos -->
+    <nav class="chapter-nav" id="chapter-nav" aria-label="Capítulos">
+        <a href="#hero" data-label="Início"></a>
+        <a href="#reforma" data-label="A Reforma"></a>
+        <a href="#pradopolis" data-label="Pradópolis"></a>
+        <a href="#concentracao" data-label="A Concentração"></a>
+        <a href="#ivt" data-label="O Termômetro"></a>
+        <a href="#huff" data-label="A Gravidade"></a>
+        <a href="#epl" data-label="A Conta"></a>
+        <a href="#montecarlo" data-label="10.000 Futuros"></a>
+        <a href="#virada" data-label="O Ponto de Virada"></a>
+    </nav>
+
+    <!-- Header fixo -->
+    <header class="site-header" id="site-header">
+        <div class="header-inner">
+            <a href="#hero" class="brand">
+                <span class="brand-mark"></span>
+                <span class="brand-text">Impactos da Reforma Tributária <em>&middot; o estudo</em></span>
+            </a>
+            <a href="{{ url_for('index') }}" class="btn-sim">Abrir o simulador <span aria-hidden="true">→</span></a>
+        </div>
+    </header>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="hero">
+        <canvas id="hero-canvas" aria-hidden="true"></canvas>
+        <div class="hero-content">
+            <span class="hero-badge reveal">Pesquisa acadêmica &middot; FEA-RP / USP &middot; 2026</span>
+            <h1 class="hero-title">
+                <span class="line reveal d1">Para onde vai o imposto</span>
+                <span class="line reveal d2">quando ele deixa de nascer</span>
+                <span class="line reveal d3 accent">na fábrica?</span>
+            </h1>
+            <p class="hero-sub reveal d4">
+                A Reforma Tributária mudou a regra do jogo: o imposto sobre o consumo deixará de
+                pertencer à cidade <strong>que produz</strong> e passará a pertencer à cidade
+                <strong>que consome</strong>. Este estudo mede, com matemática e 10.000 simulações,
+                o que isso significa para um pequeno município industrial do interior paulista.
+            </p>
+            <nav class="hero-toc reveal d5" aria-label="Sumário dos capítulos">
+                <span class="hero-toc-meta">8 capítulos &middot; ~12 min de leitura</span>
+                <div class="hero-toc-chips">
+                    <a href="#reforma"><b>01</b> A Reforma</a>
+                    <a href="#pradopolis"><b>02</b> Pradópolis</a>
+                    <a href="#concentracao"><b>03</b> A Concentração</a>
+                    <a href="#ivt"><b>04</b> O IVT</a>
+                    <a href="#huff"><b>05</b> A Gravidade</a>
+                    <a href="#epl"><b>06</b> A Conta</a>
+                    <a href="#montecarlo"><b>07</b> 10.000 Futuros</a>
+                    <a href="#virada"><b>08</b> A Virada</a>
+                </div>
+            </nav>
+            <div class="hero-meta reveal d5">
+                <div><strong>Samuel Pulcini dos Santos</strong><span>Autor &middot; Contabilidade FEA-RP/USP</span></div>
+                <div class="divider"></div>
+                <div><strong>Prof. Dr. Sílvio Hiroshi Nakao</strong><span>Orientador</span></div>
+            </div>
+        </div>
+        <a href="#reforma" class="scroll-cue" aria-label="Rolar para o conteúdo">
+            <span>Role para descer pela história</span>
+            <div class="mouse"><div class="wheel"></div></div>
+        </a>
+    </section>
+
+    <!-- ============ CAP 01 — A REFORMA ============ -->
+    <section class="chapter" id="reforma">
+        <div class="chapter-head reveal">
+            <span class="chapter-number">Capítulo 01</span>
+            <h2>A maior mudança tributária <em>em 60 anos</em></h2>
+            <p class="chapter-lead">
+                A Emenda Constitucional nº 132/2023 extinguiu o <strong class="gloss" tabindex="0" data-def="Imposto Sobre Serviços: municipal, hoje recolhido na cidade do prestador do serviço.">ISS</strong> (municipal) e o
+                <strong class="gloss" tabindex="0" data-def="Imposto sobre Circulação de Mercadorias e Serviços: estadual; 25% do total é repartido com os municípios — a chamada cota-parte.">ICMS</strong> (estadual) e criou em seu lugar o <strong class="gloss" tabindex="0" data-def="Imposto sobre Bens e Serviços: o substituto único, recolhido no destino — onde mora o consumidor final.">IBS</strong> — Imposto
+                sobre Bens e Serviços. Parece só uma troca de siglas. Não é. O que muda de verdade é
+                <em>o endereço</em> para onde o dinheiro vai.
+            </p>
+        </div>
+
+        <div class="flow-compare">
+            <div class="flow-card reveal" data-side="origem">
+                <span class="flow-tag old">Modelo atual &middot; até 2032</span>
+                <h3>Princípio da <strong>Origem</strong></h3>
+                <div class="flow-diagram" id="diagram-origem">
+                    <div class="node factory">
+                        <span class="node-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg></span>
+                        <span class="node-label">Cidade que produz</span>
+                    </div>
+                    <div class="flow-track">
+                        <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+                            <path class="flow-path" d="M0,30 C60,30 140,30 200,30"/>
+                        </svg>
+                        <span class="flow-coin" style="--delay:0s">R$</span>
+                        <span class="flow-coin" style="--delay:1.1s">R$</span>
+                        <span class="flow-coin" style="--delay:2.2s">R$</span>
+                    </div>
+                    <div class="node vault">
+                        <span class="node-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></span>
+                        <span class="node-label">Prefeitura local</span>
+                    </div>
+                </div>
+                <p>O imposto fica onde está a <strong>fábrica ou o prestador</strong>. Por décadas, isso
+                alimentou a "guerra fiscal": cidades disputando sedes de empresas para engordar a arrecadação.</p>
+            </div>
+
+            <div class="flow-versus reveal"><span>vira</span></div>
+
+            <div class="flow-card reveal" data-side="destino">
+                <span class="flow-tag new">Modelo novo &middot; IBS</span>
+                <h3>Princípio do <strong>Destino</strong></h3>
+                <div class="flow-diagram" id="diagram-destino">
+                    <div class="node factory">
+                        <span class="node-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg></span>
+                        <span class="node-label">Cidade que produz</span>
+                    </div>
+                    <div class="flow-track">
+                        <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+                            <path class="flow-path away" d="M0,30 C60,30 140,30 200,30"/>
+                        </svg>
+                        <span class="flow-coin away" style="--delay:0s">R$</span>
+                        <span class="flow-coin away" style="--delay:1.1s">R$</span>
+                        <span class="flow-coin away" style="--delay:2.2s">R$</span>
+                    </div>
+                    <div class="node cart">
+                        <span class="node-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></span>
+                        <span class="node-label">Cidade que consome</span>
+                    </div>
+                </div>
+                <p>O imposto vai para onde mora o <strong>consumidor final</strong>. Quem produz muito mas
+                consome pouco <em>perde</em>; quem consome muito mas produz pouco <em>ganha</em>.</p>
+            </div>
+        </div>
+
+        <div class="callout reveal">
+            <span class="callout-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span>
+            <p><strong>Em uma frase:</strong> hoje o imposto nasce na chaminé da fábrica.
+            A partir da reforma, ele nasce no carrinho de compras. E a transição completa
+            vai durar até <strong>2078</strong> — meio século de adaptação.</p>
+        </div>
+    </section>
+
+    <!-- ============ CAP 02 — PRADÓPOLIS ============ -->
+    <section class="chapter" id="pradopolis">
+        <div class="chapter-head reveal">
+            <span class="chapter-number">Capítulo 02</span>
+            <h2>Um gigante industrial <em>de 17 mil habitantes</em></h2>
+            <p class="chapter-lead">
+                Para testar o modelo, o estudo escolheu um caso-limite: <strong>Pradópolis-SP</strong>,
+                na Região Metropolitana de Ribeirão Preto. Uma cidade pequena que abriga uma das maiores
+                usinas sucroenergéticas do mundo — e que por isso tem tudo a perder na mudança de regra.
+            </p>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card reveal">
+                <span class="stat-value"><span class="counter" data-target="17078" data-format="int">0</span></span>
+                <span class="stat-label">habitantes</span>
+                <span class="stat-note">IBGE, 2025</span>
+            </div>
+            <div class="stat-card reveal">
+                <span class="stat-value">R$ <span class="counter" data-target="1.1" data-decimals="1">0</span> bi</span>
+                <span class="stat-label">de PIB anual</span>
+                <span class="stat-note">acima da média regional</span>
+            </div>
+            <div class="stat-card reveal">
+                <span class="stat-value">R$ <span class="counter" data-target="49306" data-format="int">0</span></span>
+                <span class="stat-label">de PIB per capita</span>
+                <span class="stat-note">parece riqueza — mas é produção, não renda</span>
+            </div>
+            <div class="stat-card reveal">
+                <span class="stat-value"><span class="counter" data-target="59" data-format="int">0</span>%</span>
+                <span class="stat-label">dos empregos formais na indústria-âncora</span>
+                <span class="stat-note">5.408 de 9.227 vínculos (RAIS/2024)</span>
+            </div>
+        </div>
+
+        <div class="region-map-block reveal">
+            <div class="region-map-head">
+                <h3>O território do estudo</h3>
+                <p>Explore o mapa real da região: Pradópolis e os polos que atraem o consumo dos seus moradores.
+                <span class="map-hint">Para navegar, use dois dedos no celular ou Ctrl + scroll no computador.</span></p>
+            </div>
+            <div id="region-map" aria-label="Mapa interativo da região de Pradópolis"></div>
+        </div>
+
+        <div class="duality reveal">
+            <h3>A dualidade: a cidade <em>produz como gigante</em>, mas <em>consome como pequena</em></h3>
+            <div class="duality-bars">
+                <div class="duality-row">
+                    <span class="duality-label">O que a cidade <strong>produz</strong> por ano (PIB)</span>
+                    <div class="duality-track"><div class="duality-fill produce" data-width="100"><span>R$ 1,10 bilhão</span></div></div>
+                </div>
+                <div class="duality-row">
+                    <span class="duality-label">O que os moradores <strong>têm para gastar</strong> (salários + benefícios)</span>
+                    <div class="duality-track"><div class="duality-fill consume" data-width="56.5"><span>R$ 621 milhões</span></div></div>
+                </div>
+            </div>
+            <p class="duality-note">
+                A renda disponível dos moradores — R$ 513,7 mi em salários, R$ 100,0 mi em aposentadorias do INSS
+                e R$ 7,5 mi do Bolsa Família — é a <strong>nova base tributável</strong> sob o princípio do destino.
+                O problema: ela é bem menor do que a riqueza industrial que sustenta a arrecadação hoje.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============ CAP 03 — A CONCENTRAÇÃO ============ -->
+    <section class="chapter" id="concentracao">
+        <div class="chapter-head reveal">
+            <span class="chapter-number">Capítulo 03</span>
+            <h2>Quase tudo depende <em>de uma única chaminé</em></h2>
+            <p class="chapter-lead">
+                Ao abrir a "caixa-preta" da arrecadação de 2024, contribuinte por contribuinte,
+                o estudo encontrou um grau extremo de concentração — e classificou cada real
+                entre o que <strong>fica</strong> e o que <strong>migra</strong> com a reforma.
+            </p>
+        </div>
+
+        <div class="vaf-block reveal">
+            <h3>De onde vem o valor que gera o repasse de ICMS (<span class="gloss" tabindex="0" data-def="Valor Adicionado Fiscal: indicador que mede a riqueza gerada em cada município e define sua fatia na cota-parte do ICMS.">VAF</span> 2024)</h3>
+            <div class="vaf-bar" id="vaf-bar">
+                <div class="vaf-seg usina" data-width="69.67"><span>Usina sucroenergética <b>69,7%</b></span></div>
+                <div class="vaf-seg grupo" data-width="5.55"><span></span></div>
+                <div class="vaf-seg logistica" data-width="13.75"><span>Logística <b>13,8%</b></span></div>
+                <div class="vaf-seg outros" data-width="10.03"><span>Outros</span></div>
+                <div class="vaf-seg varejo" data-width="1.0"><span></span></div>
+            </div>
+            <div class="vaf-legend">
+                <span><i class="dot usina"></i>Indústria sucroenergética (matriz)</span>
+                <span><i class="dot grupo"></i>Mesmo grupo (filiais, energia, cogeração) — 5,6%</span>
+                <span><i class="dot logistica"></i>Ferrovias e transportadoras que escoam a produção</span>
+                <span><i class="dot outros"></i>Demais setores</span>
+                <span><i class="dot varejo"></i>Supermercados e varejo local: <strong>menos de 1%</strong></span>
+            </div>
+            <p class="vaf-note">
+                Somando a usina, suas subsidiárias e a logística que existe para escoar sua produção,
+                o complexo exportador responde por <strong>≈ 89% de todo o valor adicionado</strong> do município.
+            </p>
+        </div>
+
+        <div class="risk-cards">
+            <div class="risk-card reveal">
+                <span class="risk-kind">ISS &middot; serviços</span>
+                <div class="risk-ring" data-pct="79.45">
+                    <svg viewBox="0 0 120 120">
+                        <circle class="ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="ring-val" cx="60" cy="60" r="52"/>
+                    </svg>
+                    <div class="ring-text"><b>79,5%</b><span>migra</span></div>
+                </div>
+                <div class="ring-legend">
+                    <span><i class="leg-migra"></i>migra para outras cidades</span>
+                    <span><i class="leg-fica"></i>fica em Pradópolis</span>
+                </div>
+                <p>Dos R$ 2,57 mi pagos pelos 20 maiores contribuintes de ISS, <strong>R$ 2,05 mi vêm de serviços
+                B2B para a usina</strong> (manutenção, caldeiraria, TI). Com o IBS, esse imposto viaja junto com o
+                açúcar e o etanol — e é recolhido na cidade do consumidor final.</p>
+            </div>
+            <div class="risk-card reveal">
+                <span class="risk-kind">ICMS &middot; cota-parte</span>
+                <div class="risk-ring" data-pct="97.63">
+                    <svg viewBox="0 0 120 120">
+                        <circle class="ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="ring-val" cx="60" cy="60" r="52"/>
+                    </svg>
+                    <div class="ring-text"><b>97,6%</b><span>migra</span></div>
+                </div>
+                <div class="ring-legend">
+                    <span><i class="leg-migra"></i>migra para outras cidades</span>
+                    <span><i class="leg-fica"></i>fica em Pradópolis</span>
+                </div>
+                <p>Na carteira dos 20 maiores geradores de VAF, <strong>R$ 22,6 mi de R$ 23,2 mi</strong> estão
+                ancorados em produção exportadora e logística. O consumo local (energia residencial, telefonia,
+                supermercados) sustenta apenas <strong>2,4%</strong>.</p>
+            </div>
+        </div>
+
+        <div class="callout reveal">
+            <span class="callout-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+            <p><strong>Detalhe metodológico:</strong> a classificação não foi feita "no automático" pelo CNAE.
+            O autor ligou e escreveu para cada grande contribuinte, confirmando se seus clientes estão
+            dentro ou fora da cidade — um levantamento primário que dá lastro empírico ao modelo.</p>
+        </div>
+    </section>
+
+    <!-- ============ CAP 04 — IVT ============ -->
+    <section class="chapter" id="ivt">
+        <div class="chapter-head reveal">
+            <span class="chapter-number">Capítulo 04</span>
+            <h2>O termômetro do risco: <em>o IVT</em></h2>
+            <p class="chapter-lead">
+                Primeiro artefato do estudo, o <strong>Índice de Vulnerabilidade na Transição</strong>
+                responde a uma pergunta simples: <em>que fração da receita atual do município está
+                ancorada no modelo que vai deixar de existir?</em>
+            </p>
+        </div>
+
+        <div class="ivt-layout">
+            <div class="formula-card reveal">
+                <div class="formula">
+                    <span class="f-term f-result">IVT</span>
+                    <span class="f-op">=</span>
+                    <span class="f-frac">
+                        <span class="f-num"><span class="f-term f-risk">ISS<sub>dest</sub></span> <span class="f-op">+</span> <span class="f-term f-risk">ICMS<sub>dest</sub></span></span>
+                        <span class="f-den"><span class="f-term f-total">R<sub>atual</sub></span></span>
+                    </span>
+                </div>
+                <ul class="formula-legend">
+                    <li><i class="f-chip risk"></i><strong>Receita em risco</strong> — ISS de serviços B2B (R$ 2,05 mi) + cota-parte de ICMS de origem produtiva (R$ 22,61 mi) = <strong>R$ 24,66 mi</strong></li>
+                    <li><i class="f-chip total"></i><strong>Receita atual total</strong> — todo o ISS + cota-parte do ICMS em 2024 = <strong>R$ 40,03 mi</strong></li>
+                </ul>
+            </div>
+
+            <div class="gauge-card reveal">
+                <div class="gauge" id="ivt-gauge">
+                    <svg viewBox="0 0 220 130">
+                        <path class="gauge-bg" d="M20,120 A90,90 0 0 1 200,120"/>
+                        <path class="gauge-zone low" d="M20,120 A90,90 0 0 1 200,120"/>
+                        <path class="gauge-zone mid" d="M20,120 A90,90 0 0 1 200,120"/>
+                        <path class="gauge-zone high" d="M20,120 A90,90 0 0 1 200,120"/>
+                        <path class="gauge-val" d="M20,120 A90,90 0 0 1 200,120"/>
+                        <line class="gauge-needle" x1="110" y1="120" x2="110" y2="42"/>
+                        <circle class="gauge-pivot" cx="110" cy="120" r="6"/>
+                    </svg>
+                    <div class="gauge-readout">
+                        <b><span class="counter" data-target="61.6" data-decimals="1">0</span>%</b>
+                        <span>IVT de Pradópolis</span>
+                    </div>
+                </div>
+                <div class="gauge-scale">
+                    <span class="zone low"><b>&lt; 30%</b> Polo consumidor<br>tende a <em>ganhar</em></span>
+                    <span class="zone mid"><b>30–50%</b> Zona de transição<br>risco moderado</span>
+                    <span class="zone high"><b>&gt; 50%</b> Polo produtor<br><em>alta vulnerabilidade</em></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="big-quote reveal">
+            <p>Mais de <strong>61% de toda a receita de consumo</strong> de Pradópolis depende de onde a produção
+            acontece — não de onde os moradores compram. São <strong>R$ 24,66 milhões por ano</strong> com
+            passagem comprada para outras cidades.</p>
+        </div>
+    </section>
+
+    <!-- ============ CAP 05 — HUFF ============ -->
+    <section class="chapter" id="huff">
+        <div class="chapter-head reveal">
+            <span class="chapter-number">Capítulo 05</span>
+            <h2>A gravidade <em>do consumo</em></h2>
+            <p class="chapter-lead">
+                Se o imposto agora segue o consumidor, a pergunta-chave vira: <em>onde os moradores de
+                Pradópolis fazem compras?</em> Para responder, o estudo usou um modelo clássico de
+                geografia econômica — o <strong>Modelo Gravitacional de Huff (1964)</strong> — em que
+                cidades grandes atraem consumidores como planetas atraem satélites.
+            </p>
+        </div>
+
+        <div class="huff-stage reveal">
+            <svg id="huff-map" viewBox="0 0 900 460">
+                <!-- linhas de distância -->
+                <line class="huff-link" x1="240" y1="300" x2="560" y2="120"/>
+                <line class="huff-link" x1="240" y1="300" x2="700" y2="330"/>
+                <!-- rótulos de distância -->
+                <text class="huff-dist" x="370" y="190" transform="rotate(-29 380 195)">30 km</text>
+                <text class="huff-dist" x="450" y="298">40 km</text>
+                <!-- cidades -->
+                <g class="huff-city" id="huff-prado">
+                    <circle class="city-halo" cx="240" cy="300" r="46"/>
+                    <circle class="city-core small" cx="240" cy="300" r="26"/>
+                    <text class="city-name" x="240" y="362">Pradópolis</text>
+                    <text class="city-sub" x="240" y="382">centro local &middot; retém 30%</text>
+                </g>
+                <g class="huff-city" id="huff-sert">
+                    <circle class="city-halo" cx="560" cy="120" r="62"/>
+                    <circle class="city-core mid" cx="560" cy="120" r="40"/>
+                    <text class="city-name" x="560" y="44">Sertãozinho</text>
+                    <text class="city-sub" x="560" y="190">polo industrial e comercial</text>
+                </g>
+                <g class="huff-city" id="huff-rp">
+                    <circle class="city-halo" cx="700" cy="330" r="86"/>
+                    <circle class="city-core big" cx="700" cy="330" r="58"/>
+                    <text class="city-name" x="700" y="240">Ribeirão Preto</text>
+                    <text class="city-sub" x="700" y="416">Capital Regional A (REGIC/IBGE)</text>
+                </g>
+                <!-- camada de partículas (consumidores) -->
+                <g id="huff-particles"></g>
+            </svg>
+            <div class="huff-caption">
+                <div class="huff-stat leak"><b>70%</b><span>das compras "vazam" para os polos vizinhos</span></div>
+                <div class="huff-stat keep"><b>30%</b><span>ficam no comércio de Pradópolis (θ<sub>ret</sub>)</span></div>
+            </div>
+        </div>
+
+        <div class="k-explain reveal">
+            <h3>Daí nasce o coeficiente <em>k</em> — o quanto de cada real vira imposto local</h3>
+            <div class="k-equation">
+                <div class="k-step">
+                    <b>c = 0,65</b>
+                    <span>De cada R$ 1 de renda, as famílias gastam 65% em bens e serviços tributáveis pelo IBS (POF/IBGE, Sudeste)</span>
+                </div>
+                <span class="k-op">×</span>
+                <div class="k-step">
+                    <b>θ<sub>ret</sub> = 0,30</b>
+                    <span>Só 30% dessas compras acontecem dentro da cidade (Modelo de Huff)</span>
+                </div>
+                <span class="k-op">=</span>
+                <div class="k-step result">
+                    <b>k = 0,195</b>
+                    <span>Apenas 19,5% da renda gera arrecadação para o próprio município</span>
+                </div>
+            </div>
+            <div class="real-note">
+                <div class="real-bar">
+                    <div class="real-kept" data-width="19.5"><span>R$ 19,50 ficam</span></div>
+                    <div class="real-lost"><span>R$ 80,50 escapam (poupança, isenções e compras fora)</span></div>
+                </div>
+                <p>É o destino de cada <strong>R$ 100 de renda</strong> gerada em Pradópolis sob a nova regra.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CAP 06 — EPL ============ -->
+    <section class="chapter" id="epl">
+        <div class="chapter-head reveal">
+            <span class="chapter-number">Capítulo 06</span>
+            <h2>A conta final: <em>a EPL</em></h2>
+            <p class="chapter-lead">
+                O segundo artefato, a <strong>Estimativa de Perda Líquida</strong>, coloca tudo na balança:
+                de um lado, o que a cidade <em>perde</em> com a migração da base produtiva; do outro,
+                o que ela <em>ganha</em> tributando o consumo dos próprios moradores.
+            </p>
+        </div>
+
+        <div class="epl-scale reveal">
+            <div class="scale-side lose">
+                <span class="scale-tag">sai</span>
+                <b>R$ 24,66 mi</b>
+                <span>receita de origem que migra para outras cidades</span>
+            </div>
+            <div class="scale-center">
+                <span class="scale-minus">−</span>
+            </div>
+            <div class="scale-side gain">
+                <span class="scale-tag">entra</span>
+                <b>R$ 21,44 mi</b>
+                <span>IBS sobre o consumo local<br>(R$ 621,2 mi × k 0,195 × alíquota 17,7%)</span>
+            </div>
+            <div class="scale-equals">
+                <span>=</span>
+                <div class="scale-result">
+                    <b>R$ 3,21 milhões de déficit por ano</b>
+                    <span>no cenário-base da alíquota do IBS</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="scenario-title reveal">E se a alíquota do IBS mudar? Três cenários:</h3>
+        <div class="scenario-grid">
+            <div class="scenario-card deficit reveal">
+                <span class="sc-rate">14,0%</span>
+                <span class="sc-name">Cenário conservador</span>
+                <b class="sc-value">− R$ 7,70 mi</b>
+                <span class="sc-class">déficit anual</span>
+                <p>Com alíquota baixa, o consumo local rende pouco e o rombo quase dobra.</p>
+            </div>
+            <div class="scenario-card deficit base reveal">
+                <span class="sc-flag">cenário-base</span>
+                <span class="sc-rate">17,7%</span>
+                <span class="sc-name">Alíquota de referência do IBS</span>
+                <b class="sc-value">− R$ 3,21 mi</b>
+                <span class="sc-class">déficit anual</span>
+                <p>A estimativa central: a cidade não se sustenta sozinha e depende do <span class="gloss" tabindex="0" data-def="Mecanismo de transição da reforma que garante parte da receita histórica dos municípios entre 2029 e 2078, derretendo gradualmente.">Seguro-Receita</span>.</p>
+            </div>
+            <div class="scenario-card surplus reveal">
+                <span class="sc-rate">26,5%</span>
+                <span class="sc-name">Referencial IVA Dual (IBS+CBS)</span>
+                <b class="sc-value">+ R$ 7,45 mi</b>
+                <span class="sc-class">superávit teórico</span>
+                <p>Apenas informativo: a CBS é federal e não entra no caixa municipal.</p>
+            </div>
+        </div>
+
+        <div class="callout reveal">
+            <span class="callout-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></span>
+            <p><strong>O modelo é deliberadamente pessimista.</strong> Ele ignora rendas de capital (lucros,
+            MEI, arrendamentos rurais — o chamado EOB), porque não há dado público municipal confiável.
+            Se essa renda invisível equivaler a só <strong>15% da base atual, o déficit zera</strong>.
+            Ou seja: os números são um <em>teto de perda</em>, não uma sentença.</p>
+        </div>
+    </section>
+
+    <!-- ============ CAP 07 — MONTE CARLO ============ -->
+    <section class="chapter" id="montecarlo">
+        <div class="chapter-head reveal">
+            <span class="chapter-number">Capítulo 07</span>
+            <h2>10.000 futuros <em>de uma vez</em></h2>
+            <p class="chapter-lead">
+                Ninguém sabe a alíquota final do IBS, nem quanto o comércio local vai crescer. Em vez de
+                chutar um número, o estudo roda uma <strong>Simulação de Monte Carlo</strong>: sorteia
+                10.000 combinações possíveis de alíquota, retenção, massa salarial e benefícios — e observa
+                a distribuição dos resultados. <em>Você está vendo essa simulação rodar agora, ao vivo,
+                no seu navegador.</em>
+            </p>
+        </div>
+
+        <div class="mc-panel reveal">
+            <div class="mc-header">
+                <div class="mc-status"><span class="mc-pulse"></span><span id="mc-counter">0</span> / 10.000 cenários simulados</div>
+                <button class="mc-replay" id="mc-replay">↻ Rodar de novo</button>
+            </div>
+            <canvas id="mc-canvas" height="340"></canvas>
+            <div class="mc-axis"><span>← superávit (a cidade ganha)</span><span>déficit (a cidade perde) →</span></div>
+
+            <div class="mc-kpis">
+                <div class="mc-kpi green">
+                    <b id="mc-prob-surplus">—</b>
+                    <span>dos futuros terminam em <strong>superávit</strong></span>
+                </div>
+                <div class="mc-kpi red">
+                    <b id="mc-prob-deficit">—</b>
+                    <span>terminam em <strong>déficit</strong></span>
+                </div>
+                <div class="mc-kpi neutral">
+                    <b id="mc-mean">—</b>
+                    <span>resultado médio esperado (EPL média)</span>
+                </div>
+                <div class="mc-kpi amber">
+                    <b id="mc-interval">—</b>
+                    <span>intervalo de 90% de confiança (P5 a P95)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="big-quote reveal">
+            <p>A moeda está no ar: <strong>56,6% de chance de a cidade se sustentar sozinha</strong>,
+            43,4% de risco de déficit. O futuro fiscal de Pradópolis não é um número — é uma
+            <strong>distribuição de probabilidades</strong>. E é exatamente isso que um gestor precisa
+            enxergar para se planejar.</p>
+        </div>
+    </section>
+
+    <!-- ============ CAP 08 — PONTO DE VIRADA ============ -->
+    <section class="chapter" id="virada">
+        <div class="chapter-head reveal">
+            <span class="chapter-number">Capítulo 08</span>
+            <h2>O ponto de virada está <em>na mão da cidade</em></h2>
+            <p class="chapter-lead">
+                A descoberta mais poderosa do estudo: a variável que decide o jogo não é a alíquota
+                (decidida em Brasília), e sim a <strong>retenção do varejo local</strong> — quanto do
+                consumo dos moradores acontece dentro da cidade. E essa, a prefeitura pode influenciar.
+                <strong>Arraste o controle</strong> e encontre o equilíbrio:
+            </p>
+        </div>
+
+        <div class="tipping-panel reveal">
+            <div class="tipping-control">
+                <label for="theta-slider">Retenção do varejo local (θ<sub>ret</sub>)</label>
+                <div class="tipping-value" id="theta-value">30%</div>
+                <input type="range" id="theta-slider" min="10" max="60" step="0.5" value="30" aria-label="Retenção do varejo local">
+                <div class="tipping-marks">
+                    <span style="left:40%"><i></i>hoje: 30%</span>
+                    <span class="be" style="left:49%"><i></i>equilíbrio: 34,5%</span>
+                </div>
+            </div>
+            <div class="tipping-result">
+                <div class="tipping-bar-wrap">
+                    <div class="tipping-zero"></div>
+                    <div class="tipping-bar" id="tipping-bar"></div>
+                </div>
+                <div class="tipping-readout">
+                    <b id="tipping-epl">—</b>
+                    <span id="tipping-label">—</span>
+                </div>
+                <p class="tipping-note" id="tipping-note"></p>
+            </div>
+        </div>
+
+        <div class="policy-grid">
+            <div class="policy-card reveal">
+                <span class="policy-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg></span>
+                <h4>Fomentar o varejo presencial</h4>
+                <p>Atrair âncoras comerciais e serviços que capturem as compras hoje drenadas por Ribeirão
+                Preto e Sertãozinho. Subir θ<sub>ret</sub> de 30% para 40% transforma o déficit de
+                R$ 3,21 mi em <strong>superávit de R$ 3,93 mi</strong>.</p>
+            </div>
+            <div class="policy-card reveal">
+                <span class="policy-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span>
+                <h4>CPF na nota, endereço certo</h4>
+                <p>No IBS, o CEP do comprador define para onde vai o imposto. Cada morador com domicílio
+                fiscal correto é receita capturada; cada cadastro errado é dinheiro indo para a cidade vizinha.</p>
+            </div>
+            <div class="policy-card reveal">
+                <span class="policy-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/></svg></span>
+                <h4>Diversificar com logística</h4>
+                <p>Centros de distribuição têm fato gerador ancorado no local físico de expedição. A ferrovia
+                que hoje só escoa açúcar pode ancorar uma nova base tributária menos dependente de um único setor.</p>
+            </div>
+        </div>
+
+        <div class="timeline-block reveal">
+            <h3>O colchão de meio século: o Seguro-Receita</h3>
+            <div class="timeline">
+                <div class="tl-seg calib">
+                    <b>2029–2032</b>
+                    <span>Calibração</span>
+                    <p>100% da média histórica garantida</p>
+                </div>
+                <div class="tl-seg conv">
+                    <b>2033–2078</b>
+                    <span>Convergência</span>
+                    <p>a garantia derrete 1/45 ao ano até zerar</p>
+                </div>
+                <div class="tl-seg free">
+                    <b>2078+</b>
+                    <span>Destino pleno</span>
+                    <p>a cidade vive do que retém</p>
+                </div>
+            </div>
+            <p class="timeline-note">O modelo quantifica exatamente o hiato que esse colchão precisará cobrir —
+            e por quanto tempo. O mundo já viveu isso: <strong>Mumbai</strong> perdeu o imposto Octroi (35% da
+            receita própria) na reforma indiana de 2017 e mergulhou em crise de liquidez; o <strong>Canadá</strong>,
+            com bases harmonizadas e cooperação federativa, fez a transição funcionar. O Brasil escolhe agora qual
+            história repetir.</p>
+        </div>
+    </section>
+
+    <!-- ============ FINAL ============ -->
+    <section class="finale" id="finale">
+        <div class="finale-inner reveal">
+            <span class="chapter-number">Conclusão</span>
+            <h2>De percepção vaga a <em>meta mensurável</em></h2>
+            <p>
+                O estudo entrega o que não existia: uma ferramenta científica, replicável em 5 etapas com dados
+                públicos, para qualquer município produtor medir seu risco <em>antes</em> da transição.
+                "Precisamos fortalecer o comércio local" deixou de ser intuição — virou um número:
+                <strong>θ<sub>ret</sub> ≥ 34,5%</strong>.
+            </p>
+            <div class="finale-artifacts">
+                <div class="artifact"><b>IVT</b><span>o termômetro da vulnerabilidade</span></div>
+                <div class="artifact"><b>EPL</b><span>a régua do impacto em reais</span></div>
+                <div class="artifact"><b>Protocolo</b><span>5 etapas para replicar em qualquer cidade</span></div>
+            </div>
+            <a href="{{ url_for('index') }}" class="btn-finale" id="btn-magnetize">
+                <span class="btn-finale-label">
+                    <svg class="icon magnet-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15-4-4 6.75-6.77a7.79 7.79 0 0 1 11 11L13 22l-4-4 6.39-6.36a2.14 2.14 0 0 0-3-3L6 15"/><path d="m5 8 4 4"/><path d="m12 15 4 4"/></svg>
+                    Experimente o simulador interativo
+                </span>
+                <span>ajuste alíquotas, retenção e renda — e rode seu próprio Monte Carlo</span>
+            </a>
+
+            <div class="sources reveal" id="fontes">
+                <span class="credits-kicker">Referências</span>
+                <div class="refs-carousel">
+                    <button type="button" class="refs-arrow refs-arrow-prev" id="refs-prev" aria-label="Referências anteriores"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+                    <ul class="sources-list refs-cards" id="refs-track" tabindex="0" aria-label="Lista de referências bibliográficas">
+                    <li><b><a href="https://doi.org/10.11606/rco.v10i26.111202" target="_blank" rel="noopener">Azevedo &amp; Aquino (2016)</a></b><span>Planejamento em municípios de pequeno porte em São Paulo &mdash; <em>Rev. de Contabilidade e Organizações</em></span></li>
+                    <li><b>Bird &amp; Gendron (2010)</b><span>Subnational Taxation in Developing Countries &mdash; World Bank</span></li>
+                    <li><b>EC n&ordm; 132/2023</b><span>Emenda Constitucional da Reforma Tributária &mdash; altera o Sistema Tributário Nacional</span></li>
+                    <li><b>LC n&ordm; 214/2025</b><span>Institui o IBS, a CBS e o Imposto Seletivo</span></li>
+                    <li><b>LC n&ordm; 227/2026</b><span>Regras de transição, fato gerador e distribuição de receitas</span></li>
+                    <li><b>Christaller (1933)</b><span><em>Die zentralen Orte in Süddeutschland</em> &mdash; teoria dos lugares centrais</span></li>
+                    <li><b>Converse (1949)</b><span>New Laws of Retail Gravitation &mdash; <em>Journal of Marketing</em></span></li>
+                    <li><b>Huff (1964)</b><span>Defining and Estimating a Trading Area &mdash; <em>Journal of Marketing</em></span></li>
+                    <li><b>Reilly (1929)</b><span>Methods for the Study of Retail Relationships &mdash; Univ. of Texas</span></li>
+                    <li><b>Lösch (1954)</b><span><em>The Economics of Location</em> &mdash; Yale University Press</span></li>
+                    <li><b>Richardson (1978)</b><span><em>Regional Economics</em> &mdash; Univ. of Illinois Press</span></li>
+                    <li><b><a href="https://www.ibge.gov.br" target="_blank" rel="noopener">REGIC &mdash; IBGE (2018)</a></b><span>Regiões de Influência das Cidades &mdash; hierarquia urbana</span></li>
+                    <li><b><a href="https://www.ibge.gov.br/cidades-e-estados/sp/pradopolis.html" target="_blank" rel="noopener">IBGE (2025)</a></b><span>Cidades e Estados: Pradópolis</span></li>
+                    <li><b>POF/IBGE (2017-2018)</b><span>Pesquisa de Orçamentos Familiares &mdash; perfil das despesas no Brasil</span></li>
+                    <li><b><a href="https://doi.org/10.11606/issn.1982-6486.rco.2020.163964" target="_blank" rel="noopener">Klein Junior (2020)</a></b><span>Gestão de riscos no setor público brasileiro &mdash; <em>RCO</em></span></li>
+                    <li><b><a href="https://doi.org/10.1590/S0104-530X2013005000014" target="_blank" rel="noopener">Lacerda et al. (2013)</a></b><span>Design Science Research &mdash; <em>Gestão &amp; Produção</em></span></li>
+                    <li><b><a href="https://www.orfonline.org" target="_blank" rel="noopener">Mankikar (2020)</a></b><span>Impacto do GST nas finanças municipais de Mumbai &mdash; ORF</span></li>
+                    <li><b><a href="https://doi.org/10.1590/1808-057x20259050" target="_blank" rel="noopener">Murcia (2025)</a></b><span>A reforma tributária e a pesquisa contábil-tributária &mdash; <em>Rev. Contabilidade &amp; Finanças</em></span></li>
+                    <li><b><a href="https://doi.org/10.1787/7594fbdd-en" target="_blank" rel="noopener">OECD (2025)</a></b><span>Revenue Statistics in Latin America and the Caribbean</span></li>
+                    <li><b><a href="https://doi.org/10.11606/issn.1982-6486.rco.2025.233211" target="_blank" rel="noopener">Soares et al. (2025)</a></b><span>Orçamento baseado em desempenho no setor público &mdash; <em>RCO</em></span></li>
+                </ul>
+                    <button type="button" class="refs-arrow refs-arrow-next" id="refs-next" aria-label="Próximas referências"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+                </div>
+
+                <span class="credits-kicker sources-kicker-2">Fontes de dados públicos</span>
+                <ul class="sources-list">
+                    <li><b>Prefeitura de Pradópolis</b><span>arrecadação municipal de ISS e ICMS &mdash; ano-base 2024</span></li>
+                    <li><b>SEFAZ-SP</b><span>Valor Adicionado Fiscal (VAF) e cota-parte do ICMS</span></li>
+                    <li><b>IBGE</b><span>população estimada e PIB dos Municípios (Pradópolis-SP)</span></li>
+                    <li><b>POF/IBGE</b><span>Pesquisa de Orçamentos Familiares &mdash; propensão ao consumo tributável (Sudeste)</span></li>
+                    <li><b>RAIS / MTE (2024)</b><span>vínculos formais de emprego e massa salarial</span></li>
+                    <li><b>INSS &middot; Bolsa Família</b><span>benefícios previdenciários e sociais transferidos ao município</span></li>
+                </ul>
+            </div>
+
+            <div class="credits reveal" id="credits">
+                <span class="credits-kicker">Quem está por trás do estudo</span>
+                <div class="credits-card">
+                    <div class="credits-avatar" id="credits-avatar"></div>
+                    <div class="credits-body">
+                        <b class="credits-name" id="credits-name"></b>
+                        <span class="credits-role" id="credits-role"></span>
+                        <p class="credits-desc" id="credits-desc"></p>
+                        <div class="credits-nav">
+                            <button id="credits-prev" aria-label="Anterior"><svg class="icon" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+                            <div class="credits-dots" id="credits-dots"></div>
+                            <button id="credits-next" aria-label="Próximo"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="study-footer">
+            <div class="footer-author">
+                <div>
+                    <b>Impactos da Reforma Tributária sobre a Arrecadação Municipal</b>
+                    <span>Samuel Pulcini dos Santos &middot; FEA-RP/USP &middot; nº 13634144</span>
+                </div>
+            </div>
+            <div class="footer-links">
+                <a href="mailto:samuelpulcini@usp.br">samuelpulcini@usp.br</a>
+                <a href="http://lattes.cnpq.br/3703550316085471" target="_blank" rel="noopener">Lattes</a>
+                <a href="https://www.linkedin.com/in/samuelpulcini" target="_blank" rel="noopener">LinkedIn</a>
+            </div>
+            <p class="footer-disclaimer">
+                Conteúdo acadêmico baseado no TCC "Impactos da Reforma Tributária sobre a Arrecadação Municipal"
+                (EC nº 132/2023 &middot; LC 214/2025). As projeções são simulações científicas com viés
+                deliberadamente conservador — não constituem previsão oficial nem aconselhamento fiscal.
+            </p>
+        </footer>
+    </section>
+
+    <script src="{{ url_for('static', filename='js/estudo.js') }}"></script>
+</body>
+</html>
